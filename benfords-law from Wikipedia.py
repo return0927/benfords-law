@@ -11,12 +11,15 @@ for n in range(500):
 global soupDict
 soupDict = {}
 
-def getSoup(url):
-    soupDict[url] = bs4.BeautifulSoup(requests.get(url).text, 'html.parser')
-
-for n in range(len(urls)):
-    threading.Thread(target=getSoup, args=(urls[n],)).start()
-
+def getSoup(n):
+    soupDict[n] = bs4.BeautifulSoup(requests.get(urls[n]).text, 'html.parser')
+try:
+    for n in range(len(urls)):
+        threading.Thread(target=getSoup, args=(n,)).start()
+except:
+    print(" ERROR : MAX Thread : %d"%n)
+finally:
+    thread_end = n
 
 def visible(element):
     if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
@@ -43,8 +46,8 @@ def monitor():
     while threading.active_count() > 3:
         pass
 
-    for url in urls:
-        soup = soupDict[url]
+    for n in range(thread_max+1):
+        soup = soupDict[n]
         title = soup.find("title").text.replace(" - 위키백과, 우리 모두의 백과사전","")
         titleText.config(text="Lastest Result | %s"%title)
         texts = soup.findAll(text=True)
